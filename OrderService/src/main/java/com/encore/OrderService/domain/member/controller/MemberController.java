@@ -49,11 +49,6 @@ public class MemberController {
         return CommonResponse.responseMassage(HttpStatus.OK, memberService.memberOrderList(pageable, id));
     }
 
-    @GetMapping("/")
-    public ResponseEntity<CommonResponse> home(){
-        return CommonResponse.responseMassage(HttpStatus.OK, "home 확인완료");
-    }
-
     @PostMapping("/doLogin")
     public ResponseEntity<CommonResponse> memberLogin(@Valid @RequestBody LoginReqDTO loginReqDTO){
         Member member = memberService.login(loginReqDTO);
