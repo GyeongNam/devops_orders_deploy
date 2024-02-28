@@ -17,10 +17,12 @@ jobs:
           node-version: '20'
 
       - name: npm install
+        working-directory: ./orderservice-front
         run: npm install
 
       - name: npm build
-        run: npm build
+        working-directory: ./orderservice-front
+        run: npm run build
 
       - name: setup aws cli
         uses: aws-actions/configure-aws-credentials@v2
@@ -31,4 +33,4 @@ jobs:
 
       - name: deploy to s3
         run: |
-          aws s3 cp ./dist s3://order-system-vue97/ --recursive
+          aws s3 cp ./orderservice-front/dist s3://order-system-vue97/ --recursive
