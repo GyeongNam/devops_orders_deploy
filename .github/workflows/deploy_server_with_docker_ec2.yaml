@@ -33,7 +33,7 @@ jobs:
       - name: ec2 ssh login and docker run
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.EC2_HOST1 }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           # type docker : docker명령어가 현재 시스템에 존재하는지를 확인
