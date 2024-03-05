@@ -34,6 +34,7 @@ COPY build.gradle .
 COPY settings.gradle .
 COPY src src
 # /app/build/libs/*.jar 파일 아래 명령어를 통해 생성
+RUN chmod +x ./gradlew
 RUN ./gradlew bootJar
 FROM openjdk:17-jdk-alpine
 WORKDIR /app
