@@ -1,0 +1,56 @@
+name: Deploy to Ec2 With Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Docker Image
+        working-directory: ./OrderService
+        run: docker build -t gyeongnam/order-backend:v2
+
+      - name: DockerHub Login
+        uses: docker/login-action@v1 #docker 재단에서 만들어놓은 docker 사용
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Image to DockerHub
+        run: docker push gyeongnam/order-backend:v2
+
+      - name: ec2 ssh login and docker run
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # type docker : docker명령어가 현재 시스템에 존재하는지를 확인
+          # > /dev/null : 명령어의 출력을 무시할 때 사용
+          # curl -s https://get.docker.com -o get-docker.sh // get-docker.sh 이름으로 https://get.docker.xn--com-yh0o html 내용을 다운받아서 저장
+          # sudo docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} docker hub repo private에서는 로그인 필요
+          script: |
+            if ! type docker > /dev/null ; then
+              curl -s https://get.docker.com -o get-docker.sh
+              sudo sh get-docker.sh
+            fi
+            sudo docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+            
+            sudo docker pull gyeongnam/order-backend:v2
+            sudo docker rm -f order-backend || true
+            
+            sudo docker run -d --name order-backend -p 80:8080 \
+            -e SPRING_DATASOURCE_URL=jdbc:mariadb://${{ secrets.DB_HOST }}:3306/orderservice \
+            -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+            -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} gyeongnam/order-backend:v2
