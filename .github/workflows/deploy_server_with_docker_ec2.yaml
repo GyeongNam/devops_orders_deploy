@@ -19,7 +19,7 @@ jobs:
 
       - name: Build Docker Image
         working-directory: ./OrderService
-        run: docker build -t gyeongnam/order-backend:v2
+        run: docker build -t gyeongnam/order-backend:v2 .
 
       - name: DockerHub Login
         uses: docker/login-action@v1 #docker 재단에서 만들어놓은 docker 사용
